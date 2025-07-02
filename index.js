@@ -114,3 +114,18 @@ Watch: ${gameLink}`;
 
 console.log('✅ MLB Error Bot starting...');
 setInterval(checkGames, 5000);
+
+// ✅ TEST ONLY: Send a one-time test email on startup
+async function testEmail() {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: process.env.EMAIL_TO,
+    subject: '✅ Test Email from MLB Error Bot',
+    text: 'If you got this, your Render email setup WORKS!'
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log('✅ Test email sent!');
+}
+
+testEmail();
