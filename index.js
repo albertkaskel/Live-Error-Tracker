@@ -114,21 +114,4 @@ setInterval(checkGames, 5000);
 
 
 
-// ✅ FINAL TEST BLOCK: Send a one-time test email on startup
-async function testEmail() {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_TO,
-    subject: '✅ Test Email from MLB Error Bot',
-    text: 'If you got this, your Render + Gmail App Password is 100% working!'
-  };
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log('✅ Test email sent successfully!');
-  } catch (err) {
-    console.error('❌ Test email FAILED:', err);
-  }
-}
-
-testEmail();
