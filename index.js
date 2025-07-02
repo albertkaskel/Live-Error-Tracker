@@ -115,6 +115,7 @@ Watch: ${gameLink}`;
 console.log('✅ MLB Error Bot starting...');
 setInterval(checkGames, 5000);
 
+
 // ✅ TEST ONLY: Send a one-time test email on startup
 async function testEmail() {
   const mailOptions = {
@@ -125,6 +126,10 @@ async function testEmail() {
   };
 
   await transporter.sendMail(mailOptions);
+  console.log('✅ Test email sent!');
+}
+
+testEmail();
   console.log('✅ Test email sent!');
 }
 
