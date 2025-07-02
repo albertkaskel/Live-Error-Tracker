@@ -4,12 +4,11 @@ const nodemailer = require('nodemailer');
 const express = require('express');
 const app = express();
 
-// Keep the server alive (Render needs this)
-app.get('/', (req, res) => res.send('✅ MLB Error Bot is alive!'));
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🌐 Express server running on port ${PORT}`));
+// Keep Render awake
+app.get('/', (req, res) => res.send('MLB Error Bot is alive'));
+app.listen(3000, () => console.log('🌐 Express server running on port 3000'));
 
-// Nodemailer transporter
+// Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -17,6 +16,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
+
 const EMAIL_TO = process.env.EMAIL_TO.split(',');
 
 const seenPlays = new Set();
@@ -41,17 +41,18 @@ async function getGameData(gamePk) {
 }
 
 async function checkGames() {
-  console.log(`⏱️ checkGames() running at ${new Date().toLocaleTimeString()}`);
-
+  console.log('⏱️ checkGames() running...');
   const gamePks = await getGamePKs();
+
   console.log(`📌 Found ${gamePks.length} games`);
 
   for (const pk of gamePks) {
     try {
       const plays = await getPlays(pk);
+      const gameData = await getGameData(pk);
+
       console.log(`🔍 Checking GamePK ${pk} with ${plays.length} plays`);
 
-      const gameData = await getGameData(pk);
       const homeTeamSlug = gameData?.teams?.home?.name.toLowerCase().replace(/\s+/g, '-') || 'home';
       const awayTeamSlug = gameData?.teams?.away?.name.toLowerCase().replace(/\s+/g, '-') || 'away';
       const gameLink = `https://www.mlb.com/gameday/${awayTeamSlug}-vs-${homeTeamSlug}/${pk}`;
@@ -90,20 +91,16 @@ Watch: ${gameLink}`;
 
         console.log('📬 Sending alert:', msg);
 
-        try {
-          for (const email of EMAIL_TO) {
-            const mailOptions = {
-              from: process.env.EMAIL_USER,
-              to: email.trim(),
-              subject: 'MLB Error Alert',
-              text: msg,
-            };
+        for (const email of EMAIL_TO) {
+          const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email.trim(),
+            subject: 'MLB Error Alert',
+            text: msg,
+          };
 
-            await transporter.sendMail(mailOptions);
-            console.log(`✅ Email sent to ${email.trim()}`);
-          }
-        } catch (err) {
-          console.error(`❌ Error sending email for game ${pk}:`, err.message);
+          await transporter.sendMail(mailOptions);
+          console.log(`✅ Email sent to ${email.trim()}`);
         }
       }
     } catch (err) {
@@ -112,24 +109,19 @@ Watch: ${gameLink}`;
   }
 }
 
-console.log('✅ MLB Error Bot starting...');
+// Run every 5 seconds
 setInterval(checkGames, 5000);
 
-
-// ✅ TEST ONLY: Send a one-time test email on startup
+// ✅ TEST: Send a one-time test email on startup
 async function testEmail() {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.EMAIL_TO,
     subject: '✅ Test Email from MLB Error Bot',
-    text: 'If you got this, your Render email setup WORKS!'
+    text: 'If you got this, your Render + Gmail setup WORKS!',
   };
 
   await transporter.sendMail(mailOptions);
-  console.log('✅ Test email sent!');
-}
-
-testEmail();
   console.log('✅ Test email sent!');
 }
 
